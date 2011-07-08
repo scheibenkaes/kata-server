@@ -10,8 +10,7 @@
   (with-open [serv-sock (create-server-socket)]
     (loop []
       (let [sock (.accept serv-sock)
-            f (partial callback sock)
-            thread (Thread. f)]
+            thread (Thread. (partial callback sock))]
         (do
           (.start thread)
           (recur))))))

@@ -8,3 +8,6 @@
     false))
 
 (defrecord Player [name])
+
+(defn new-player [name] 
+  (Player. name))

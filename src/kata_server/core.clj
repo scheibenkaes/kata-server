@@ -12,8 +12,10 @@
       (.flush out)
       (.close sock))))
 
+(def connected-players (ref #{}))
+
 (defn add-to-match [player] 
-  (write-line (:socket (meta player)) "HELO "))
+  (send-line (:socket (meta player)) "HELO "))
 
 (defn on-connection-created [sock] 
   (let [player (authenticate sock)]

@@ -7,7 +7,7 @@
 (def helo #"HELO (.+)")
 
 (defn authenticate [sock] 
-  (when-let [line (socket/read-line sock)]
+  (when-let [line (socket/read-line-with-timeout sock 5000)]
     (when-let [cmd (re-find helo (.trim line))]
       (let [n (second cmd)]
         (with-meta (new-player n) {:socket sock :reader (reader sock) :writer (writer sock)})))))

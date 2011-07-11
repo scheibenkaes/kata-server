@@ -16,8 +16,9 @@
 
 (deftest test-roll-with-a-number-other-than-6 
   (let [dice 5
-        {:keys [current-play active-player]} (roll dice (update-in test-match [:current-play] conj 5))]
+        {:keys [current-play roster active-player]} (roll dice (update-in test-match [:current-play] conj 5))]
     (is (= current-play [5 5]))
+    (is (= roster (:roster test-match)))
     (is (= active-player :foo))))
 
 (deftest test-roll-with-6 

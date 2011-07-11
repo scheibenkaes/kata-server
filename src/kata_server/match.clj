@@ -57,13 +57,18 @@
 (defn sum-current-play [match] 
   (apply + (:current-play match)))
 
+(defn end-of-match [{:keys [active-player roster current-play] :as match}] 
+  (let [final-roster (sort-by second (map (fn [[k _]] [k (sum-roster k match)]) roster))]
+    (assoc match :final-results (into {} final-roster))))
+
 (defn run-match [{:keys [active-player roster] :as match}] 
-  (let [someone-won? (>= (+ (sum-current-play match) (sum-roster match)) *max-points*)
-        decision (receive-decision active-player)]
-    (let [new-match 
-          (case decision
-            :roll (roll (inc (rand-int 6)) match)
-            :hold (hold match)
-            :error (error match))]
-      (recur new-match))))
+  (let [someone-won? (>= (+ (sum-current-play match) (sum-roster match)) *max-points*) ]
+    (if someone-won?
+      (end-of-match match)
+      (let [decision (receive-decision active-player)
+            new-match (case decision
+                        :roll (roll (inc (rand-int 6)) match)
+                        :hold (hold match)
+                        :error (error match))]
+        (recur new-match)))))
 

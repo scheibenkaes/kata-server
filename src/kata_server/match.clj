@@ -1,6 +1,10 @@
 (ns kata-server.match
   (:use kata-server.socket))
 
+(def *max-points* 50)
+
+(def *rounds-to-play* 10)
+
 (defn player-names [players] (map :name players)) 
 
 (defn new-match [players] 
@@ -8,10 +12,7 @@
     {:roster roster
      :players players
      :current-play []
-     :active-player (:name (first players))
-     }))
-
-(def *max-points* 50)
+     :active-player (:name (first players))}))
 
 (defn receive-decision [active-player] 
   (do
@@ -47,16 +48,6 @@
            :active-player (next-player (:active-player match) (:players match)))
     (update-in match [:current-play] conj dice)))
 
-(defn run-match [{:keys [active-player roster] :as match}] 
-  (let [dice (inc (rand-int 6))
-        decision (receive-decision active-player)]
-    (let [new-match 
-          (case decision
-            :roll (roll dice match)
-            :hold (hold match)
-            :error (error match))]
-      (recur new-match))))
-
 (defn sum-roster
   ([player {roster :roster}]
    (let [players-roster (player roster)]
@@ -65,3 +56,14 @@
 
 (defn sum-current-play [match] 
   (apply + (:current-play match)))
+
+(defn run-match [{:keys [active-player roster] :as match}] 
+  (let [someone-won? (>= (+ (sum-current-play match) (sum-roster match)) *max-points*)
+        decision (receive-decision active-player)]
+    (let [new-match 
+          (case decision
+            :roll (roll (inc (rand-int 6)) match)
+            :hold (hold match)
+            :error (error match))]
+      (recur new-match))))
+

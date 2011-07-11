@@ -27,3 +27,13 @@
     (is (= :bar active-player))
     (is (= (:roster in-game-match) roster))
     (is (= [] current-play))))
+
+(deftest test-hold 
+  (let [rost [3 2 1 5]
+        {:keys [active-player current-play roster]} (hold (assoc test-match :roster {:foo [[2 3 5] [5 5]]} :current-play rost))]
+    (is (= 20 (apply + (-> roster :foo flatten))))
+    (is (= [[2 3 5] [5 5] [3 2 1 5]] (:foo roster)))
+    (is (= :bar active-player))
+    (is (= [] current-play))))
+
+

@@ -22,16 +22,23 @@
         (.startsWith answer "HOLD") :hold
         :else :error))))
 
-(defn hold [match] 
-  )
+(defn next-player 
+  ([cur all] 
+   (let [player-cycle (cycle (player-names all))
+         next-in-list (drop-while #(not= % cur) player-cycle)]
+     (second next-in-list)))
+  ([match]
+   (next-player (:active-player match) (:players match))))
+
+(defn hold [{:keys [roster active-player current-play] :as match}] 
+  (let [next-p (next-player match)]
+    (assoc match
+           :active-player next-p
+           :current-play []
+           :roster (update-in roster [active-player] conj current-play))))
 
 (defn error [match] 
   )
-
-(defn next-player [cur all] 
-  (let [player-cycle (cycle (player-names all))
-        next-in-list (drop-while #(not= % cur) player-cycle)]
-    (second next-in-list)))
 
 (defn roll [dice match] 
   (if (= 6 dice)

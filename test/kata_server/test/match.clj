@@ -47,8 +47,3 @@
   (let [play [3 4 5 1]
         match (assoc test-match :current-play play)]
     (is (= 13 (sum-current-play match)))))
-
-(deftest test-end-of-match
-  (let [roster {:foo [[1 2 3] [1 2 3]] :bar [] :xxx [[5 5 5] [5 5 5]]}
-        result {:foo 12 :bar 0 :xxx 30}]
-    (is (= result (:final-results (end-of-match (assoc test-match :roster roster)))))))

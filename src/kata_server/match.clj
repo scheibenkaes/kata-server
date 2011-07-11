@@ -8,7 +8,7 @@
 (defn player-names [players] (map :name players)) 
 
 (defn new-match [players] 
-  (let [roster (apply hash-map (interleave (map :name players) (repeat 0))) ]
+  (let [roster (apply hash-map (interleave (map :name players) (repeat []))) ]
     {:roster roster
      :players players
      :current-play []
@@ -57,8 +57,15 @@
 (defn sum-current-play [match] 
   (apply + (:current-play match)))
 
+(defn sum-of-active-player [match] 
+  (+ (sum-roster match) (sum-current-play match)))
+
+(defn calc-final-result [{:keys [active-player roster] :as match}] 
+  (let [result (into {} (map (fn [[k _]] [k (sum-roster k match)]) roster))]
+    (update-in result [active-player] + (sum-current-play match))))
+
 (defn run-match [{:keys [active-player roster] :as match}] 
-  (let [someone-won? (>= (+ (sum-current-play match) (sum-roster match)) *max-points*) ]
+  (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]
     (if someone-won?
       (end-of-match match)
       (let [decision (receive-decision active-player)

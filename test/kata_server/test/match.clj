@@ -14,6 +14,9 @@
     (is (contains? match :active-player))
     (is (contains? match :players))))
 
+(deftest test-inital-roster 
+  (is (every? vector? (vals (:roster test-match)))))
+
 (deftest test-roll-with-a-number-other-than-6 
   (let [dice 5
         {:keys [current-play roster active-player]} (roll dice (update-in test-match [:current-play] conj 5))]
@@ -47,3 +50,13 @@
   (let [play [3 4 5 1]
         match (assoc test-match :current-play play)]
     (is (= 13 (sum-current-play match)))))
+
+(deftest test-sum-of-active-player
+ (let [roster {:foo [] :bar [[5 4 3] [1 1 1]]}
+       current-play [3 2 4]]
+   (is (= 24 (sum-of-active-player (assoc test-match :roster roster :current-play current-play :active-player :bar))))))
+
+(deftest test-calc-final-result
+  (let [roster {:foo [] :bar [[5 4 3] [1 1 1]] :xxx [[5 5 3]]}
+        current-play [3 2 4]]
+    (is (= {:foo 0 :bar 24 :xxx 13} (calc-final-result (assoc test-match :roster roster :current-play current-play :active-player :bar))))))

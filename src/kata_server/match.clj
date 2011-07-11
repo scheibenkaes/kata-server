@@ -56,3 +56,12 @@
             :hold (hold match)
             :error (error match))]
       (recur new-match))))
+
+(defn sum-roster
+  ([player {roster :roster}]
+   (let [players-roster (player roster)]
+     (apply + (flatten players-roster))))
+  ([match] (sum-roster (:active-player match) match)))
+
+(defn sum-current-play [match] 
+  (apply + (:current-play match)))

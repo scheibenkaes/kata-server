@@ -42,9 +42,11 @@
     args
     "Usage java kata-server-*-standalone.jar"
     [[num? n? "On how many connected players should a match start" *min-players*]
+     [points? "Points needed to win a match" 50]
      [port? p? "Port to listen to" 8000]]
     (do
       (add-watch players-queue :startup player-queue-watcher)
       (binding [*min-players* num?
+                *max-points* points?
                 *port* port?]
         (server-loop on-connection-created)))))

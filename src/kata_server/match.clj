@@ -64,6 +64,9 @@
   (let [result (into {} (map (fn [[k _]] [k (sum-roster k match)]) roster))]
     (update-in result [active-player] + (sum-current-play match))))
 
+(defn end-of-match [match] 
+  )
+
 (defn run-match [{:keys [active-player roster] :as match}] 
   (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]
     (if someone-won?

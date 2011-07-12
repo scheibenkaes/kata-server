@@ -17,9 +17,9 @@
 
 (defn add-to-queue [player] 
   (do
+    (send-line player (str "HELO " (-> player :name name)))
     (dosync
-      (alter players-queue conj player))
-    (send-line player (str "HELO " (-> player :name name)))))
+      (alter players-queue conj player))))
 
 (defn on-connection-created [sock] 
   (let [player (authenticate sock)]

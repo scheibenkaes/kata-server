@@ -79,14 +79,18 @@
         presult (apply str "RESULT: " pretty)]
     (multicast-line (:players match) presult)))
 
+(defn id->obj [id {players :players}] 
+  (first (filter #(= id (:name %)) players)))
+
 (defn run-match [{:keys [active-player roster] :as match}] 
   (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]
     (if someone-won?
       (end-of-match match)
-      (let [decision (receive-decision active-player)
-            new-match (case decision
+      (let [active-player-obj (id->obj active-player match)
+            decision (receive-decision active-player-obj)
+            new-match-state (case decision
                         :roll (roll (inc (rand-int 6)) match)
                         :hold (hold match)
                         :error (error match))]
-        (recur new-match)))))
+        (recur new-match-state)))))
 

@@ -32,7 +32,9 @@
   (let [line-up (shuffle players)
         match (new-match line-up)]
     (do
-      (send-current-roster-to-all match))))
+      (send-current-roster-to-all match)
+      (println match)
+      (run-match match))))
 
 (defn player-queue-watcher [_ reference old-state new-state] 
   (when (>= (count new-state) *min-players*)

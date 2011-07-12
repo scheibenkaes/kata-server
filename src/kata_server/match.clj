@@ -19,6 +19,7 @@
     (send-line active-player "DECIDE")
     (let [answer (receive-line active-player)]
       (cond 
+        (nil? answer) :error
         (.startsWith answer "ROLL") :roll
         (.startsWith answer "HOLD") :hold
         :else :error))))
@@ -38,15 +39,27 @@
            :current-play []
            :roster (update-in roster [active-player] conj current-play))))
 
-(defn error [match] 
-  )
+(defn id->obj [id {players :players}] 
+  (first (filter #(= id (:name %)) players)))
 
-(defn roll [dice match] 
+(defn error [{:keys [active-player] :as match}] 
+  (do
+    (send-line (id->obj active-player match) "ERROR: Unkown command.")
+    (assoc match :active-player (next-player match) :current-play [])))
+
+(defn update-match-on-roll [dice match] 
   (if (= 6 dice)
     (assoc match 
            :current-play []
            :active-player (next-player (:active-player match) (:players match)))
     (update-in match [:current-play] conj dice)))
+
+(defn roll [dice {:keys [active-player players] :as match}] 
+  (let [new-match-state (update-match-on-roll dice match)
+        throw-msg (str "THROW " (name active-player) " threw a " dice)]
+    (do 
+      (multicast-line players throw-msg)
+      new-match-state)))
 
 (defn sum-roster
   ([player {roster :roster}]
@@ -78,9 +91,6 @@
         pretty (pprint-roster result)
         presult (apply str "RESULT: " pretty)]
     (multicast-line (:players match) presult)))
-
-(defn id->obj [id {players :players}] 
-  (first (filter #(= id (:name %)) players)))
 
 (defn run-match [{:keys [active-player roster] :as match}] 
   (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]

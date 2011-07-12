@@ -29,7 +29,7 @@
 
 (defn multicast-line [recipients line] 
   (doseq [rec recipients]
-    (send-line (:socket rec) line)))
+    (send-line (-> rec meta :socket) line)))
 
 (defn read-line-with-timeout [sock timeout] 
   (let [a (agent nil)

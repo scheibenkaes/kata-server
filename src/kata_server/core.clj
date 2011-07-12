@@ -19,7 +19,7 @@
   (do
     (dosync
       (alter players-queue conj player))
-    (send-line player (str "HELO " (:name player)))))
+    (send-line player (str "HELO " (-> player :name name)))))
 
 (defn on-connection-created [sock] 
   (let [player (authenticate sock)]
@@ -27,15 +27,21 @@
       (add-to-queue player)
       (decline-player sock))))
 
+
 (defn start-one-match [players] 
   (let [line-up (shuffle players)
         match (new-match line-up)]
-    (println line-up)
-    (println match)))
+    (do
+      (send-current-roster-to-all match))))
 
 (defn player-queue-watcher [_ reference old-state new-state] 
   (when (>= (count new-state) *min-players*)
     (start-one-match new-state)))
+
+(defn run-queue [] 
+  (let [f (partial server-loop on-connection-created)
+        t (Thread. f)]
+    (doto t .start)))
 
 (defn -main [& args] 
   (with-command-line

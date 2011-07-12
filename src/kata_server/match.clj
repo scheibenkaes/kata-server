@@ -57,15 +57,27 @@
 (defn sum-current-play [match] 
   (apply + (:current-play match)))
 
+(defn pprint-roster [roster] 
+  (butlast (interleave (map (fn [[k v]] (str (name k) ": " v)) (sort-by second > roster)) (repeat ", "))))
+
+(defn roster-with-sums [{:keys [roster] :as match}] 
+  (into {} (map (fn [[k _]] [k (sum-roster k match)]) roster)))
+
+(defn send-current-roster-to-all [{:keys [roster players] :as match}] 
+  (multicast-line players (apply str "ROSTER: " (pprint-roster (roster-with-sums match)))))
+
 (defn sum-of-active-player [match] 
   (+ (sum-roster match) (sum-current-play match)))
 
 (defn calc-final-result [{:keys [active-player roster] :as match}] 
-  (let [result (into {} (map (fn [[k _]] [k (sum-roster k match)]) roster))]
+  (let [result (roster-with-sums match)]
     (update-in result [active-player] + (sum-current-play match))))
 
 (defn end-of-match [match] 
-  )
+  (let [result (calc-final-result match)
+        pretty (pprint-roster result)
+        presult (apply str "RESULT: " pretty)]
+    (multicast-line (:players match) presult)))
 
 (defn run-match [{:keys [active-player roster] :as match}] 
   (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]

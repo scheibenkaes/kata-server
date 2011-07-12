@@ -9,5 +9,5 @@
 
 (defrecord Player [name])
 
-(defn new-player [name] 
-  (Player. name))
+(defn new-player [n] 
+  (Player. (keyword n)))

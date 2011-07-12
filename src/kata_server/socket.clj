@@ -18,11 +18,12 @@
 (defmulti send-line has-a-socket-in-meta?)
 
 (defmethod send-line false [sock line]
-  (let [out (writer sock)]
-    (doto out
-      (.write line)
-      .newLine
-      .flush)))
+  (when (and sock (.isConnected sock))
+    (let [out (writer sock)]
+      (doto out
+        (.write line)
+        .newLine
+        .flush))))
 
 (defmethod send-line true [player line]
   (send-line (-> player meta :socket) line))
@@ -31,7 +32,7 @@
   (doseq [rec recipients]
     (send-line (-> rec meta :socket) line)))
 
-(defn read-line-with-timeout [sock timeout] 
+(defn receive-line-with-timeout [sock timeout] 
   (let [a (agent nil)
         f (fn [_] (receive-line sock))]
     (do

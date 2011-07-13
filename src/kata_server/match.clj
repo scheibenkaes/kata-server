@@ -1,4 +1,5 @@
 (ns kata-server.match
+  (:require [clojure.contrib.logging :as log])
   (:use kata-server.socket))
 
 (def *max-points* 50)
@@ -32,12 +33,35 @@
   ([match]
    (next-player (:active-player match) (:players match))))
 
-(defn hold [{:keys [roster active-player current-play] :as match}] 
+(defn sum-roster
+  ([player {roster :roster}]
+   (let [players-roster (player roster)]
+     (apply + (flatten players-roster))))
+  ([match] (sum-roster (:active-player match) match)))
+
+(defn roster-with-sums [{:keys [roster] :as match}] 
+  (into {} (map (fn [[k _]] [k (sum-roster k match)]) roster)))
+
+(defn pprint-roster [roster] 
+  (butlast (interleave (map (fn [[k v]] (str (name k) ": " v)) (sort-by second > roster)) (repeat ", "))))
+
+(defn send-current-roster-to-all [{:keys [roster players] :as match}] 
+  (multicast-line players (apply str "ROSTER: " (pprint-roster (roster-with-sums match)))))
+
+(defn update-match-on-hold [{:keys [roster active-player current-play] :as match}] 
   (let [next-p (next-player match)]
     (assoc match
            :active-player next-p
            :current-play []
            :roster (update-in roster [active-player] conj current-play))))
+
+(defn hold [match] 
+  (let [next-match-state (update-match-on-hold match)
+        broad-cast-msg (str "HOLD " (-> match :active-player name) " holds.")]
+    (do
+      (multicast-line (:players match) broad-cast-msg)
+      (send-current-roster-to-all next-match-state)
+      next-match-state)))
 
 (defn id->obj [id {players :players}] 
   (first (filter #(= id (:name %)) players)))
@@ -61,23 +85,8 @@
       (multicast-line players throw-msg)
       new-match-state)))
 
-(defn sum-roster
-  ([player {roster :roster}]
-   (let [players-roster (player roster)]
-     (apply + (flatten players-roster))))
-  ([match] (sum-roster (:active-player match) match)))
-
 (defn sum-current-play [match] 
   (apply + (:current-play match)))
-
-(defn pprint-roster [roster] 
-  (butlast (interleave (map (fn [[k v]] (str (name k) ": " v)) (sort-by second > roster)) (repeat ", "))))
-
-(defn roster-with-sums [{:keys [roster] :as match}] 
-  (into {} (map (fn [[k _]] [k (sum-roster k match)]) roster)))
-
-(defn send-current-roster-to-all [{:keys [roster players] :as match}] 
-  (multicast-line players (apply str "ROSTER: " (pprint-roster (roster-with-sums match)))))
 
 (defn sum-of-active-player [match] 
   (+ (sum-roster match) (sum-current-play match)))
@@ -93,14 +102,16 @@
     (multicast-line (:players match) presult)))
 
 (defn run-match [{:keys [active-player roster] :as match}] 
-  (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]
-    (if someone-won?
-      (end-of-match match)
-      (let [active-player-obj (id->obj active-player match)
-            decision (receive-decision active-player-obj)
-            new-match-state (case decision
-                        :roll (roll (inc (rand-int 6)) match)
-                        :hold (hold match)
-                        :error (error match))]
-        (recur new-match-state)))))
+  (do
+    (log/info match)
+    (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]
+      (if someone-won?
+        (end-of-match match)
+        (let [active-player-obj (id->obj active-player match)
+              decision (receive-decision active-player-obj)
+              new-match-state (case decision
+                                :roll (roll (inc (rand-int 6)) match)
+                                :hold (hold match)
+                                :error (error match))]
+          (recur new-match-state))))))
 

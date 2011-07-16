@@ -4,7 +4,9 @@
   (:use clojure.java.io)
   (:gen-class))
 
-(def *min-players* 2)
+(def *min-players* (atom 2))
+
+(def *max-points* (atom 50))
 
 (defn decline-player [sock] 
   (let [out (writer sock)]
@@ -30,15 +32,16 @@
 
 (defn start-one-match [players] 
   (let [line-up (shuffle players)
-        match (new-match line-up)]
+        match (new-match line-up :max-points @*max-points*)]
     (do
       (send-current-roster-to-all match)
-      (println match)
       (run-match match))))
 
 (defn player-queue-watcher [_ reference old-state new-state] 
-  (when (>= (count new-state) *min-players*)
-    (start-one-match new-state)))
+  (when (>= (count new-state) @*min-players*)
+    (do 
+      (start-one-match new-state)
+      (dosync (ref-set players-queue [])))))
 
 (defn run-queue [] 
   (let [f (partial server-loop on-connection-created)
@@ -49,12 +52,11 @@
   (with-command-line
     args
     "Usage java kata-server-*-standalone.jar"
-    [[num? n? "On how many connected players should a match start" *min-players*]
-     [points? "Points needed to win a match" 50]
-     [port? p? "Port to listen to" 8000]]
+    [[number n "On how many connected players should a match start" "2"]
+     [points "Points needed to win a match" "50"]
+     [port p "Port to listen to" "8000"]]
     (do
       (add-watch players-queue :startup player-queue-watcher)
-      (binding [*min-players* num?
-                *max-points* points?
-                *port* port?]
-        (server-loop on-connection-created)))))
+      (reset! *min-players* (Integer/parseInt number))
+      (reset! *max-points* (Integer/parseInt points))
+      (server-loop on-connection-created :port (Integer/parseInt port)))))

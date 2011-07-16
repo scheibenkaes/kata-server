@@ -2,18 +2,16 @@
   (:require [clojure.contrib.logging :as log])
   (:use kata-server.socket))
 
-(def *max-points* 50)
-
-(def *rounds-to-play* 10)
-
 (defn player-names [players] (map :name players)) 
 
-(defn new-match [players] 
-  (let [roster (apply hash-map (interleave (map :name players) (repeat []))) ]
-    {:roster roster
+(defn new-match [players & args] 
+  (let [opts (apply hash-map args)
+        roster (apply hash-map (interleave (map :name players) (repeat []))) ]
+    (into {:roster roster
      :players players
      :current-play []
-     :active-player (:name (first players))}))
+     :active-player (:name (first players))}
+          opts)))
 
 (defn receive-decision [active-player] 
   (do
@@ -101,10 +99,10 @@
         presult (apply str "RESULT: " pretty)]
     (multicast-line (:players match) presult)))
 
-(defn run-match [{:keys [active-player roster] :as match}] 
+(defn run-match [{:keys [active-player roster max-points] :as match}] 
   (do
     (log/info match)
-    (let [someone-won? (>= (sum-of-active-player match) *max-points*) ]
+    (let [someone-won? (>= (sum-of-active-player match) max-points) ]
       (if someone-won?
         (end-of-match match)
         (let [active-player-obj (id->obj active-player match)

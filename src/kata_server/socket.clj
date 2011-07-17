@@ -31,11 +31,3 @@
 (defn multicast-line [recipients line] 
   (doseq [rec recipients]
     (send-line (-> rec meta :socket) line)))
-
-(defn receive-line-with-timeout [sock timeout] 
-  (let [a (agent nil)
-        f (fn [_] (receive-line sock))]
-    (do
-      (send-off a f)
-      (when (await-for timeout a) @a))))
-

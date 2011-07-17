@@ -31,11 +31,17 @@
       (add-to-queue player)
       (decline-player sock))))
 
+(defn close-connection [players] 
+  (doseq [player players]
+    (-> player meta :socket (doto .close))))
+
 (defn start-matches [n players] 
   (let [matches (for [_ (range n)] (new-match (shuffle players) :max-points @*max-points*))]
-    (doseq [match matches]
-      (send-current-roster-to-all match)
-      (run-match match))))
+    (do
+      (doseq [match matches]
+        (send-current-roster-to-all match)
+        (run-match match))
+      (close-connection players))))
 
 (defn player-queue-watcher [_ reference old-state new-state] 
   (when (>= (count new-state) @*min-players*)

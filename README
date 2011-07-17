@@ -1,6 +1,28 @@
 # kata-server
 
-## License
+# Starten des Programms mit Standard-Parametern:
+
+java -jar kata-server-1.0.0-SNAPSHOT-standalone.jar
+
+# Beenden
+
+Strg + C beendet den Server.
+
+# Hilfe und Anzeige der Standard-Parameter
+
+java -jar kata-server-1.0.0-SNAPSHOT-standalone.jar -h
+
+# Protokoll
+
+## Authentifizierung
+
+### Im erfolgreichen Fall:
+Client: HELO [Benutzername]
+Server: HELO [Benutzername]
+
+Der Benutzername muss folgendem regulärem Ausdruck genügen: [\w-_\d ]{2,12}
+Ansonsten wird die Authentifizierung abgelehnt.
+# License
 
 Copyright (C) 2011 Benjamin Klüglein
 

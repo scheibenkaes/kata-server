@@ -31,11 +31,9 @@
       (add-to-queue player)
       (decline-player sock))))
 
-
 (defn start-matches [n players] 
-  (let [line-up (shuffle players)
-        match (new-match line-up :max-points @*max-points*)]
-    (do
+  (let [matches (for [_ (range n)] (new-match (shuffle players) :max-points @*max-points*))]
+    (doseq [match matches]
       (send-current-roster-to-all match)
       (run-match match))))
 

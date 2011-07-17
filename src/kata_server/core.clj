@@ -1,7 +1,7 @@
 (ns kata-server.core
-  (:use clojure.contrib.command-line)
   (:use [kata-server server match socket auth])
-  (:use clojure.java.io)
+  (:use clojure.java.io 
+        clojure.contrib.command-line)
   (:gen-class))
 
 (def *rounds-to-play* (atom 1))
@@ -63,6 +63,7 @@
      [port p "Port to listen to" "8000"]
      [matches m "Number of matches to play" "1"]]
     (do
+      (System/setProperty "java.util.logging.config.file" "logging.properties")
       (add-watch players-queue :startup player-queue-watcher)
       (reset! *min-players* (Integer/parseInt number))
       (reset! *max-points* (Integer/parseInt points))

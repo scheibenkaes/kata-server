@@ -1,5 +1,3 @@
-# kata-server
-
 # Starten des Programms mit Standard-Parametern:
 
 java -jar kata-server-1.0.0-SNAPSHOT-standalone.jar
@@ -22,6 +20,51 @@ Server: HELO [Benutzername]
 
 Der Benutzername muss folgendem regulärem Ausdruck genügen: [\w-_\d ]{2,12}
 Ansonsten wird die Authentifizierung abgelehnt.
+
+## Im Spiel
+
+Das Spiel startet, nachdem sich die konfigurierte Anzahl an Spielern erfolgreich authentifiziert hat. (Siehe Hilfe)
+
+Zu Beginn erhält jeder Spieler den Roster.
+Beispiel:
+
+    ROSTER: qwe: 0, bkjb: 0
+
+Er beschreibt den aktuellen Stand und alle Mitspieler.
+
+### Spieler am Zug
+Der Spiel der am Zug ist erhält die Meldung:
+    DECIDE
+
+Nun akzeptiert der Server folgende Kommandos vom Client:
+    ROLL
+    HOLD
+
+Im Falle von HOLD bekommt der Spieler die aktuell erzielten Punkte gut geschrieben und der nächste Spieler ist an der Reihe. 
+Zusätzlich erhalten alle Spieler die Nachricht:
+    HOLD [Benutzername] holds.
+
+Sendet der Client ein "ROLL" würfelt der Server und teil das Ergebnis mit:
+    THROW [Benutzername] threw a [gewürfeltes Ergebnis]
+Handelt es sich bei dem gewürfelten Ergebnis um eine 6, so ist der nächste Spieler an der Reihe.
+Ist das Ergebnis keine 6 so erhält der aktuelle Spieler wiederum die Meldung
+    DECIDE
+und darf entscheiden, wie er weiter spielt.
+
+
+Erreicht ein Spieler während er am Zug ist die eingestellte Zielpunktzahl, so endet das Match automatisch, ohne dass er ein HOLD schicken muss.
+Alle Spieler erhalten dann das Endergebnis des Match mit der folgenden beispielhaften Meldung:
+RESULT: brew: 13, pro: 5, red: 0
+
+Über einen Parameter lässt sich im Server einstellen, wie viele Matches gespielt werden sollen.
+Hat der Server die eingestellte Anzahl noch nicht erreicht beginnt das nächste Match automatisch.
+Ist die Anzahl erreicht beendet der Server die Verbindungen zu allen Clients.
+
+### Protokollfehler
+
+Schickt ein Client ein falsches Kommando im Spiel erhält er die Nachricht "ERROR: Unknown command." und wird mit dem Entzug des Wurfrechts bestraft.
+Der nächste Spieler in der Reihe ist nun am Zug.
+
 # License
 
 Copyright (C) 2011 Benjamin Klüglein

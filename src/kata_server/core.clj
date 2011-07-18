@@ -1,5 +1,5 @@
 (ns kata-server.core
-  (:use [kata-server server match socket auth])
+  (:use [kata-server server match socket auth web])
   (:require [noir.server :as noir])
   (:use clojure.java.io 
         clojure.contrib.command-line)

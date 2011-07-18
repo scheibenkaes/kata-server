@@ -1,5 +1,6 @@
 (ns kata-server.core
   (:use [kata-server server match socket auth])
+  (:require [noir.server :as noir])
   (:use clojure.java.io 
         clojure.contrib.command-line)
   (:gen-class))
@@ -61,6 +62,7 @@
     [[number n "On how many connected players should a match start" "2"]
      [points "Points needed to win a match" "50"]
      [port p "Port to listen to" "8000"]
+     [web? w? "Start the web interface" false]
      [matches m "Number of matches to play" "1"]]
     (do
       (System/setProperty "java.util.logging.config.file" "logging.properties")
@@ -68,4 +70,5 @@
       (reset! *min-players* (Integer/parseInt number))
       (reset! *max-points* (Integer/parseInt points))
       (reset! *rounds-to-play* (Integer/parseInt matches))
+      (when web? (noir/start 8080 {}))
       (server-loop on-connection-created :port (Integer/parseInt port)))))

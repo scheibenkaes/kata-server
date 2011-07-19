@@ -1,5 +1,5 @@
 (ns kata-server.core
-  (:use [kata-server server match socket auth web])
+  (:use [kata-server server match socket auth web stats])
   (:require [noir.server :as noir])
   (:use clojure.java.io 
         clojure.contrib.command-line)
@@ -36,12 +36,17 @@
   (doseq [player players]
     (-> player meta :socket (doto .close))))
 
+(defn run-single-match [match] 
+  "Run a single match and return its result."
+  (do
+    (send-current-roster-to-all match)
+    (run-match match)))
+
 (defn start-matches [n players] 
   (let [matches (for [_ (range n)] (new-match (shuffle players) :max-points @*max-points*))]
     (do
-      (doseq [match matches]
-        (send-current-roster-to-all match)
-        (run-match match))
+      (let [results (doall (map run-single-match matches))]
+        (save-stats results))
       (close-connection players))))
 
 (defn player-queue-watcher [_ reference old-state new-state] 

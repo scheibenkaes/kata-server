@@ -1,4 +1,5 @@
 (ns kata-server.web
+  (:use kata-server.stats)
   (:use [noir core])
   (:use [hiccup core page-helpers]))
 
@@ -10,5 +11,8 @@
      (include-js "/js/highcharts.js")]
     [:body body]))
 
+(defpartial distribution [{:keys [throw-distribution] :as match}]
+  [:div (str throw-distribution)])
+
 (defpage "/" []
-  (main-layout "Render"))
+  (main-layout "Render" (distribution (-> @last-game-played first))))

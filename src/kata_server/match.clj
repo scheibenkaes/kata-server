@@ -101,11 +101,12 @@
   (let [result (calc-final-result match)
         pretty (pprint-roster result)
         presult (apply str "RESULT: " pretty)]
-    (multicast-line (:players match) presult)))
+    (multicast-line (:players match) presult)
+    match))
 
 (defn run-match [{:keys [active-player roster max-points] :as match}] 
   (do
-    (log/info match)
+    (log/debug match)
     (let [someone-won? (>= (sum-of-active-player match) max-points) ]
       (if someone-won?
         (end-of-match match)

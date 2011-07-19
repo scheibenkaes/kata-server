@@ -16,10 +16,10 @@
   (is (= 15 (-> (add-final-roster test-data) add-sums :sums :foo)))
   (is (= 21 (-> (add-final-roster test-data) add-sums :sums :bar))))
 
-(deftest test-process-matches
+(deftest test-save-stats
   (do
     (dosync (ref-set last-game-played []))
-    (process-matches [test-data])
+    (save-stats [test-data])
     (let [m (first @last-game-played)]
       (is (contains? m :final-roster))
       (is (contains? m :sums))

@@ -3,8 +3,6 @@
 
 (def last-game-played (ref nil))
 
-(defn valid-throw? [n] (not= 6 n))
-
 (defn add-sums [match] 
   "Add a map of player name to points to the given match."
   (assert (contains? match :final-roster))
@@ -28,9 +26,11 @@
          :throw-distribution 
          (into {} (for [[k v] final-roster] [k (apply hash-map (player-distri (k final-roster)))]))))
 
+(defn add-stats [matches] 
+  "Add statistical information to each match in matches.  "
+  (->> (map add-final-roster matches) (map add-sums) (map add-throw-distribution)))
 
-(defn process-matches [matches] 
+(defn save-stats [matches] 
+  "Save the stats of the given matches to last-game-played"
   (dosync
-    (ref-set 
-      last-game-played 
-      (->> (map add-final-roster matches) (map add-sums) (map add-throw-distribution)))))
+    (ref-set last-game-played (add-stats matches))))

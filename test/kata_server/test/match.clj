@@ -10,6 +10,7 @@
 (deftest test-new-match 
   (let [match test-match]
     (is (contains? match :roster))
+    (is (= {:foo [] :bar []} (:roster match)))
     (is (contains? match :current-play))
     (is (contains? match :active-player))
     (is (contains? match :players))))
@@ -28,7 +29,7 @@
   (let [in-game-match (update-in test-match [:current-play] conj 4)
         {:keys [current-play active-player roster]} (roll 6 in-game-match)]
     (is (= :bar active-player))
-    (is (= (:roster in-game-match) roster))
+    (is (= [[4 6]] (-> roster :foo)))
     (is (= [] current-play))))
 
 (deftest test-hold 
@@ -39,12 +40,11 @@
     (is (= [] current-play))))
 
 (deftest test-sum-roster 
-  (let [roster [[2 3 4] [3 5 1] [3]]
+  (let [roster [[2 3 4] [3 5 1] [3 6]]
         match (update-in test-match [:roster :foo] cons roster)
         sum (sum-roster match)
         sum2 (sum-roster (:active-player match) match)]
-    (is (= sum sum2))
-    (is (= 21 sum))))
+    (is (= 18 sum sum2))))
 
 (deftest test-sum-current-play 
   (let [play [3 4 5 1]

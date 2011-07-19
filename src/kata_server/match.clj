@@ -4,6 +4,8 @@
 
 (defn player-names [players] (map :name players)) 
 
+(defn valid-throw? [t] (not= t 6))
+
 (defn new-match [players & args] 
   (let [opts (apply hash-map args)
         roster (apply hash-map (interleave (map :name players) (repeat []))) ]
@@ -34,7 +36,7 @@
 (defn sum-roster
   ([player {roster :roster}]
    (let [players-roster (player roster)]
-     (apply + (flatten players-roster))))
+     (->> players-roster (filter #(every? valid-throw? %)) flatten (apply +))))
   ([match] (sum-roster (:active-player match) match)))
 
 (defn roster-with-sums [{:keys [roster] :as match}] 
@@ -69,11 +71,13 @@
     (send-line (id->obj active-player match) "ERROR: Unkown command.")
     (assoc match :active-player (next-player match) :current-play [])))
 
-(defn update-match-on-roll [dice match] 
+(defn update-match-on-roll [dice {:keys [roster current-play active-player players] :as match}] 
   (if (= 6 dice)
-    (assoc match 
-           :current-play []
-           :active-player (next-player (:active-player match) (:players match)))
+    (let [new-rost-entry (conj (active-player roster) (conj current-play dice))
+          with-next-player (assoc match 
+                                  :current-play []
+                                  :active-player (next-player active-player players))]
+      (update-in with-next-player [:roster active-player] conj (conj current-play dice)))
     (update-in match [:current-play] conj dice)))
 
 (defn roll [dice {:keys [active-player players] :as match}] 

@@ -22,7 +22,7 @@
 
 (defn add-to-queue [player] 
   (do
-    (send-line player (str "HELO " (-> player :name name)))
+    (send-line player (str "HELO " (-> player :name name) (format " [ROUNDS %s, MAX %s]" @*rounds-to-play* @*max-points*)))
     (dosync
       (alter players-queue conj player))))
 

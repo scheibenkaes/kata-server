@@ -75,5 +75,5 @@
       (reset! *min-players* (Integer/parseInt number))
       (reset! *max-points* (Integer/parseInt points))
       (reset! *rounds-to-play* (Integer/parseInt matches))
-      (when web? (noir/start 8080 {}))
+      (when web? (noir/start 8001 {}))
       (server-loop on-connection-created :port (Integer/parseInt port)))))

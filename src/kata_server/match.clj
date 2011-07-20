@@ -4,7 +4,8 @@
 
 (defn player-names [players] (map :name players)) 
 
-(defn valid-throw? [t] (not= t 6))
+(defn valid-throw? [t] 
+  (and (number? t) (not= t 6)))
 
 (defn new-match [players & args] 
   (let [opts (apply hash-map args)

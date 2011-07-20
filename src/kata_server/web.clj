@@ -13,15 +13,17 @@
     [:body body]))
 
 (defpartial match-table
-  [{:keys [sums] :as match}]
+  [{:keys [sums final-roster] :as match}]
   [:table
    [:tr
-    [:th "Platzierung"] [:th "Name"] [:th "Punkte"]]
-   (for [[i [k v]] (map-indexed (fn [cnt [k v]] [(inc cnt) [k v]]) (sort-by second > sums))] [:tr [:td (str i)] [:td (name k)] [:td (str v)]])])
+    [:th "Platzierung"] [:th "Name"] [:th "Punkte"] [:th "Würfe"]]
+   (for [[i [k v]] (map-indexed (fn [cnt [k v]] [(inc cnt) [k v]]) (sort-by second > sums))] [:tr [:td (str i)] [:td (name k)] [:td (str v)] [:td (str (k final-roster))]])])
 
 (defpartial match-tables
   [matches]
-  [:div#match-tables (for [m matches] [:div (match-table m)])])
+  [:h2 "Alle Durchgänge"]
+  [:div#match-tables (for [m matches] [:div (match-table m)])]
+  [:hr])
 
 (defpartial distribution [{:keys [throw-distribution] :as match}]
   [:div (str match)]

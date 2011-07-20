@@ -1,7 +1,7 @@
 (ns kata-server.web
   (:use kata-server.stats)
   (:use [kata-server.match :only [player-names]])
-  (:use [noir core])
+  (:use [noir core response])
   (:use [hiccup core page-helpers]))
 
 (defn add-vecs [& vs] 
@@ -14,12 +14,8 @@
   (let [players (-> matches first :players)
         player-names (-> players player-names vec)
         distris (map :throw-distribution matches)
-        names-to-dist (for [n player-names] [n (apply add-vecs (vec (for [dis (map n distris)] (vec (vals dis)))))])
-        data (into {} names-to-dist)]
-    {
-     :ticks player-names
-     :data data
-     }))
+        names-to-dist (for [n player-names] [n (apply add-vecs (vec (for [dis (map n distris)] (vec (vals dis)))))])]
+    {:ticks player-names :data (into {} names-to-dist)}))
 
 (defpartial main-layout [title & body]
   (html5 
@@ -52,6 +48,9 @@
   [matches]
   [:div#results
    (match-tables matches)])
+
+;(defpage "/data/dist" []
+;  (json (distribution-to-chart @last-game-played)))
 
 (defpage "/" []
   (main-layout "Übersicht über die zuletzt gespielten Partien." (results @last-game-played)))

@@ -9,6 +9,7 @@
    {:players [{:name :foo} {:name :bar}]
     :throw-distribution {:foo {1 1 2 0 3 2 4 3 5 2 6 1} 
                          :bar {1 0 2 5 3 3 4 1 5 10 6 0}}}])
+
 ; ticks: [Player1 Player2 Player3]
 ; data: [1er-sp1 2er-sp2 ...]
 ; data: [1er-sp2 2er-sp2 ...]

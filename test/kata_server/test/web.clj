@@ -17,7 +17,7 @@
 
 (deftest test-distribution-to-chart-data
   (let [result (distribution-to-chart test-data)]
-    (is (= {:ticks ["foo" "bar"] :data {:foo [2 0 4 6 4 2] :bar [0 10 6 2 20 0]}}
+    (is (= {:ticks [:foo :bar] :data {:foo [2 0 4 6 4 2] :bar [0 10 6 2 20 0]}}
            result))))
 
 (deftest test-add-vecs

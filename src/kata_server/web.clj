@@ -14,15 +14,8 @@
   (let [players (-> matches first :players)
         player-names (-> players player-names vec)
         distris (map :throw-distribution matches)
-        init (into {} (for [p player-names] [p (vec (repeat 6 0))]))
-        data (reduce 
-               (fn [acc cur] 
-                 (let [vs (for [n player-names ds (map n distris)]
-                            [n [ds]])]
-                   (println distris))
-                 acc) 
-               init 
-               distris)]
+        names-to-dist (for [n player-names] [n (apply add-vecs (vec (for [dis (map n distris)] (vec (vals dis)))))])
+        data (into {} names-to-dist)]
     {
      :ticks player-names
      :data data

@@ -1,7 +1,32 @@
 (ns kata-server.web
   (:use kata-server.stats)
+  (:use [kata-server.match :only [player-names]])
   (:use [noir core])
   (:use [hiccup core page-helpers]))
+
+(defn add-vecs [& vs] 
+  (assert (apply = (map count vs)))
+  (vec (map #(apply + %) (partition (count vs) (apply interleave vs)))))
+
+(defn distribution-to-chart [matches] 
+  "Take all :throw-distribution values an transform them to
+  be rendered to a chart."
+  (let [players (-> matches first :players)
+        player-names (-> players player-names vec)
+        distris (map :throw-distribution matches)
+        init (into {} (for [p player-names] [p (vec (repeat 6 0))]))
+        data (reduce 
+               (fn [acc cur] 
+                 (let [vs (for [n player-names ds (map n distris)]
+                            [n [ds]])]
+                   (println distris))
+                 acc) 
+               init 
+               distris)]
+    {
+     :ticks player-names
+     :data data
+     }))
 
 (defpartial main-layout [title & body]
   (html5 

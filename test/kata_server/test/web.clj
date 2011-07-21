@@ -10,6 +10,10 @@
     :throw-distribution {:foo {1 1 2 0 3 2 4 3 5 2 6 1} 
                          :bar {1 0 2 5 3 3 4 1 5 10 6 0}}}])
 
+(def runtime-data '({:throw-distribution {:asd {1 0, 2 0, 3 0, 4 1, 5 2, 6 0}}, :sums {:asd 14}, :final-roster {:asd [[5] [4 5]]}, :roster {:asd [[5]]}, :players [{:name :asd}], :current-play [4 5], :active-player :asd, :max-points 10}))
+
+(deftest test-runtime-data 
+  (is (= {:ticks [:asd] :data {:asd [0 0 0 1 2 0]}} (distribution-to-chart runtime-data))))
 ; ticks: [Player1 Player2 Player3]
 ; data: [1er-sp1 2er-sp2 ...]
 ; data: [1er-sp2 2er-sp2 ...]

@@ -6,16 +6,18 @@
 
 (defn add-vecs [& vs] 
   (assert (apply = (map count vs)))
-  (vec (map #(apply + %) (partition (count vs) (apply interleave vs)))))
+  (if (= 1 (count vs))
+    (first vs)
+    (vec (map #(apply + %) (partition (count vs) (apply interleave vs))))))
 
 (defn distribution-to-chart [matches] 
   "Take all :throw-distribution values an transform them to
   be rendered to a chart."
   (let [players (-> matches first :players)
-        player-names (-> players player-names vec)
+        names (-> players player-names vec)
         distris (map :throw-distribution matches)
-        names-to-dist (for [n player-names] [n (apply add-vecs (vec (for [dis (map n distris)] (vec (vals dis)))))])]
-    {:ticks player-names :data (into {} names-to-dist)}))
+        names-to-dist (for [n names] [n (apply add-vecs (vec (for [dis (map n distris)] (vec (vals dis)))))])]
+    {:ticks names :data (into {} names-to-dist)}))
 
 (defpartial main-layout [title & body]
   (html5 
@@ -49,8 +51,8 @@
   [:div#results
    (match-tables matches)])
 
-;(defpage "/data/dist" []
-;  (json (distribution-to-chart @last-game-played)))
+(defpage "/data/dist" []
+  (json (distribution-to-chart @last-game-played)))
 
 (defpage "/" []
   (main-layout "Übersicht über die zuletzt gespielten Partien." (results @last-game-played)))

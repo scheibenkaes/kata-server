@@ -1,6 +1,5 @@
 (ns kata-server.stats
-  (:use [kata-server.match :only [valid-throw?]])
-  (:use [clojure.contrib.json :only [json-str]]))
+  (:use [kata-server.match :only [valid-throw?]]))
 
 (def last-game-played (ref nil))
 
@@ -8,9 +7,6 @@
   "Add a map of player name to points to the given match."
   (assert (contains? match :final-roster))
   (assoc match :sums (into {} (for [[k v] (:final-roster match)] [k (->> (filter #(every? valid-throw? %) v) flatten (apply +))]))))
-
-(defn matches->json [] 
-  (json-str @last-game-played))
 
 (defn add-final-roster [{:keys [roster current-play active-player] :as match}] 
   "Add the final roster under the :final-roster keyword to the given match."

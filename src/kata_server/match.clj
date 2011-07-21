@@ -9,11 +9,13 @@
 
 (defn new-match [players & args] 
   (let [opts (apply hash-map args)
-        roster (apply hash-map (interleave (map :name players) (repeat []))) ]
+        roster (apply hash-map (interleave (map :name players) (repeat [])))
+        roster-sums (apply hash-map (interleave (map :name players) (repeat 0)))]
     (into {:roster roster
-     :players players
-     :current-play []
-     :active-player (:name (first players))}
+           :players players
+           :current-play []
+           :roster-sums roster-sums
+           :active-player (:name (first players))}
           opts)))
 
 (defn receive-decision [active-player] 
@@ -49,11 +51,13 @@
 (defn send-current-roster-to-all [{:keys [roster players] :as match}] 
   (multicast-line players (apply str "ROSTER: " (pprint-roster (roster-with-sums match)))))
 
-(defn update-match-on-hold [{:keys [roster active-player current-play] :as match}] 
-  (let [next-p (next-player match)]
+(defn update-match-on-hold [{:keys [roster roster-sums active-player current-play] :as match}] 
+  (let [next-p (next-player match)
+        cur-sum (apply + current-play)]
     (assoc match
            :active-player next-p
            :current-play []
+           :roster-sums (update-in roster-sums [active-player] + cur-sum)
            :roster (update-in roster [active-player] conj current-play))))
 
 (defn hold [match] 
@@ -91,8 +95,8 @@
 (defn sum-current-play [match] 
   (apply + (:current-play match)))
 
-(defn sum-of-active-player [match] 
-  (+ (sum-roster match) (sum-current-play match)))
+(defn sum-of-active-player [{:keys [active-player] :as match}] 
+  (+ (-> match :roster-sums active-player) (sum-current-play match)))
 
 (defn calc-final-result [{:keys [active-player roster] :as match}] 
   (let [result (roster-with-sums match)]

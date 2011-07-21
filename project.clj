@@ -5,5 +5,4 @@
                  [noir "0.3.0"]]
   :dev-dependencies [[org.clojars.autre/lein-vimclojure "1.0.0"]
                      [lein-vim "1.0.2-SNAPSHOT"]]
-  :main kata-server.core
-  :warn-on-reflection true)
+  :main kata-server.core)

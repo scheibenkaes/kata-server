@@ -10,26 +10,47 @@
     (first vs)
     (vec (map #(apply + %) (partition (count vs) (apply interleave vs))))))
 
+(defn frequencies-or-0 
+  ([acc freqs]
+   (if (= 6 (count freqs))
+     freqs
+     (recur (inc acc) (if-let [c (freqs acc)] freqs (assoc freqs acc 0)))))
+  ([freqs]
+   (frequencies-or-0 1 freqs)))
+
+(defn save-interleave [ps] 
+  (if (= 1 (count ps))
+    (first ps)
+    (apply interleave ps)))
+
 (defn distribution-to-chart [matches] 
   "Take all :throw-distribution values an transform them to
   be rendered to a chart."
   (let [players (-> matches first :players)
-        names (-> players player-names vec)
-        distris (map :throw-distribution matches)
-        names-to-dist (for [n names] [n (apply add-vecs (vec (for [dis (map n distris)] (vec (vals dis)))))])]
-    {:ticks names :data (into {} names-to-dist)}))
+        names (-> players player-names sort vec)
+        count-players (count names)
+        rosters (map :final-roster matches)
+        names-to-dist (vec (for [n names] (apply add-vecs (for [ros rosters] (->> (n ros) flatten frequencies frequencies-or-0 (sort-by first) vals vec)))))]
+    {:ticks names :data (vec (map vec (->> (save-interleave names-to-dist) (partition count-players))))}))
 
 (defpartial main-layout [title & body]
   (html5 
     [:head
      [:title title]
      (include-js "/js/jquery-1.6.2.min.js")
-     (include-js "/js/highcharts.js")
-     (include-js "/js/distribution.js")]
+     (include-js "/js/jquery.jqplot.js")
+     (include-js "/js/plugins/jqplot.barRenderer.min.js")
+     (include-js "/js/plugins/jqplot.categoryAxisRenderer.min.js")
+     (include-js "/js/plugins/jqplot.pointLabels.min.js")
+     (include-js "/js/chart.js")
+     ]
     [:body body]))
 
 (defpartial match-table
   [{:keys [sums final-roster] :as match}]
+  [:h1 "Wurfverteilung"]
+  [:div#chart ""]
+  [:hr]
   [:table
    [:tr
     [:th "Platzierung"] [:th "Name"] [:th "Punkte"] [:th "Würfe"]]

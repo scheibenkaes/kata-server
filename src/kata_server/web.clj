@@ -57,6 +57,14 @@
      ]
     [:body body]))
 
+(defpartial final-board [matches]
+  (let [board (leader-board matches)]
+    [:div#board
+     [:h2 "Gesamtergebnis"]
+     [:table 
+      [:tr [:th "Platzierung"] [:th "Name"] [:th "Siege"]]
+      (for [[rank nm w] (map-indexed (fn [i [n wins]] [(inc i) n wins]) (sort-by second > board))] [:tr [:td (str rank)] [:td (name nm)] [:td (str w)]])]]))
+
 (defpartial match-table
   [{:keys [sums final-roster] :as match}]
   [:div#chart ""]
@@ -72,13 +80,9 @@
   [:div#match-tables (for [m matches] [:div (match-table m)])]
   [:hr])
 
-(defpartial distribution [{:keys [throw-distribution] :as match}]
-  [:div (str match)]
-  #_[:div#container.highcharts-container {:style "width: 100%; height: 600px; background: blue;"} ""]
-  [:div (match-table match)])
-
 (defpartial results
   [matches]
+  (final-board matches)
   [:div#results
    (match-tables matches)])
 

@@ -48,6 +48,7 @@
   (html5 
     [:head
      [:title title]
+     [:link {:rel "shortcut icon" :href "/favicon.ico"}]
      (include-js "/js/jquery-1.6.2.min.js" "/js/jquery-ui-1.8.14.custom.min.js")
      (include-js "/js/jquery.jqplot.js")
      (include-js "/js/plugins/jqplot.barRenderer.min.js")

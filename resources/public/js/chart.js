@@ -7,7 +7,6 @@ $(function () {
         dist.data = data.data;
 
         plot = $.jqplot('chart', dist.data, {
-            legend: {show: true, placement: 'outsideGrid'},
             seriesDefaults: {
                                 renderer: $.jqplot.BarRenderer,
              rendererOptions: {fillToZero: false},

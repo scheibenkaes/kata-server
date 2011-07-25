@@ -1,17 +1,9 @@
 html {
-    background-color: #edd400;
+    background-color: #729fcf;
     color: black;
 }
 
-#tabs {
-    min-height: 700px;
-}
-
-#t-2 {
-    min-height: 500px;
-}
 
 #chart {
-    width: 650px;
     height 300px;
 }

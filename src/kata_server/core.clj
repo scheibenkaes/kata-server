@@ -70,7 +70,6 @@
      [web? w? "Start the web interface" false]
      [matches m "Number of matches to play" "1"]]
     (do
-      (println 123)
       (System/setProperty "java.util.logging.config.file" "logging.properties")
       (add-watch players-queue :startup player-queue-watcher)
       (reset! *min-players* (Integer/parseInt number))

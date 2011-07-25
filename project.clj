@@ -1,5 +1,5 @@
-(defproject kata-server "1.1.1-SNAPSHOT"
-  :description "FIXME: write description"
+(defproject kata-server "1.2.0"
+  :description "Play a dice game against you colleagues."
   :dependencies [[org.clojure/clojure "1.2.1"]
                  [org.clojure/clojure-contrib "1.2.0"]
                  [noir "0.3.0"]]

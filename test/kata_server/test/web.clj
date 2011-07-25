@@ -35,12 +35,12 @@
   (is (= [1 2 3 4 5 ] (save-interleave [[1 2 3 4 5]]))))
 
 (deftest test-single-player-data 
-  (let [exp {:ticks [:foo] :data (vec (partition 1 [2 0 4 6 4 2]))}]
+  (let [exp {:ticks [:foo] :data (vec (map vec (partition 1 [1 0 2 3 2 1])))}]
     (is (= exp (distribution-to-chart test-data-single-player)))))
 
 (deftest test-distribution-to-chart-data
   (let [result (distribution-to-chart test-data)]
-    (is (= {:ticks [:bar :foo] :data {:foo [2 0 4 6 4 2] :bar [0 10 6 2 20 0]}}
+    (is (= {:ticks [:bar :foo] :data [[0 2] [10 0] [6 4] [2 6] [20 4] [0 2]]}
            result))))
 
 (deftest test-add-vecs

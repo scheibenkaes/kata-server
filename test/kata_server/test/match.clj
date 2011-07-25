@@ -11,6 +11,7 @@
   (let [match test-match]
     (is (contains? match :roster))
     (is (= {:foo [] :bar []} (:roster match)))
+    (is (= {:foo 0 :bar 0} (:roster-sums match)))
     (is (contains? match :current-play))
     (is (contains? match :active-player))
     (is (contains? match :players))))
@@ -27,16 +28,18 @@
 
 (deftest test-roll-with-6 
   (let [in-game-match (update-in test-match [:current-play] conj 4)
-        {:keys [current-play active-player roster]} (roll 6 in-game-match)]
+        {:keys [current-play active-player roster roster-sums]} (roll 6 in-game-match)]
     (is (= :bar active-player))
+    (is (= roster-sums (:roster-sums in-game-match)))
     (is (= [[4 6]] (-> roster :foo)))
     (is (= [] current-play))))
 
 (deftest test-hold 
   (let [rost [3 2 1 5]
-        {:keys [active-player current-play roster]} (hold (assoc test-match :roster {:foo [[2 3 5] [5 5]]} :current-play rost))]
+        {:keys [active-player current-play roster roster-sums]} (hold (assoc test-match :roster {:foo [[2 3 5] [5 5]]} :current-play rost))]
     (is (= [[2 3 5] [5 5] [3 2 1 5]] (:foo roster)))
     (is (= :bar active-player))
+    (is (= (+ (-> test-match :roster-sums :foo) (apply + rost)) (:foo roster-sums)))
     (is (= [] current-play))))
 
 (deftest test-sum-roster 
@@ -53,8 +56,9 @@
 
 (deftest test-sum-of-active-player
  (let [roster {:foo [] :bar [[5 4 3] [1 1 1]]}
+       sums {:foo 0 :bar 15}
        current-play [3 2 4]]
-   (is (= 24 (sum-of-active-player (assoc test-match :roster roster :current-play current-play :active-player :bar))))))
+   (is (= 24 (sum-of-active-player (assoc test-match :roster roster :current-play current-play :active-player :bar :roster-sums sums))))))
 
 (deftest test-calc-final-result
   (let [roster {:foo [] :bar [[5 4 3] [1 1 1]] :xxx [[5 5 3]]}

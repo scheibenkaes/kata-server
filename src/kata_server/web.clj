@@ -1,4 +1,5 @@
 (ns kata-server.web
+  (:use [clojure.set :only [difference]])
   (:use kata-server.stats)
   (:use [kata-server.match :only [player-names]])
   (:use [noir core response])
@@ -33,6 +34,16 @@
         names-to-dist (vec (for [n names] (apply add-vecs (for [ros rosters] (->> (n ros) flatten frequencies frequencies-or-0 (sort-by first) vals vec)))))]
     {:ticks names :data (vec (map vec (->> (save-interleave names-to-dist) (partition count-players))))}))
 
+(defn leader-board [matches] 
+  "Transform the given matches into the form of:
+  {:player-name1 (int times-won) :pl...}"
+  (let [players (-> (first matches) :players player-names set)
+        winners (map :active-player matches)
+        winners-freq (frequencies winners)
+        players-not-won-a-round (difference players (set winners))
+        players-with-0 (for [p players-not-won-a-round] [p 0])]
+    (into winners-freq players-with-0)))
+
 (defpartial main-layout [title & body]
   (html5 
     [:head
@@ -48,7 +59,6 @@
 
 (defpartial match-table
   [{:keys [sums final-roster] :as match}]
-  [:h1 "Wurfverteilung"]
   [:div#chart ""]
   [:hr]
   [:table

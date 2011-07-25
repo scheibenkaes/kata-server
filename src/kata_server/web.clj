@@ -48,27 +48,24 @@
   (html5 
     [:head
      [:title title]
-     (include-js "/js/jquery-1.6.2.min.js")
+     (include-js "/js/jquery-1.6.2.min.js" "/js/jquery-ui-1.8.14.custom.min.js")
      (include-js "/js/jquery.jqplot.js")
      (include-js "/js/plugins/jqplot.barRenderer.min.js")
      (include-js "/js/plugins/jqplot.categoryAxisRenderer.min.js")
      (include-js "/js/plugins/jqplot.pointLabels.min.js")
-     (include-js "/js/chart.js")
-     ]
+     (include-js "/js/chart.js" "/js/main.js")
+     (include-css "/css/smoothness/jquery-ui-1.8.14.custom.css" "/css/main.css")]
     [:body body]))
 
 (defpartial final-board [matches]
   (let [board (leader-board matches)]
     [:div#board
-     [:h2 "Gesamtergebnis"]
      [:table 
       [:tr [:th "Platzierung"] [:th "Name"] [:th "Siege"]]
-      (for [[rank nm w] (map-indexed (fn [i [n wins]] [(inc i) n wins]) (sort-by second > board))] [:tr [:td (str rank)] [:td (name nm)] [:td (str w)]])]]))
+      (for [[rank nm w] (map-indexed (fn [i [n wins]] [(inc i) n wins]) (sort-by second > board))] [:tr [:td (str "#" rank)] [:td (name nm)] [:td (str w)]])]]))
 
 (defpartial match-table
   [{:keys [sums final-roster] :as match}]
-  [:div#chart ""]
-  [:hr]
   [:table
    [:tr
     [:th "Platzierung"] [:th "Name"] [:th "Punkte"] [:th "Würfe"]]
@@ -76,7 +73,6 @@
 
 (defpartial match-tables
   [matches]
-  [:h2 "Alle Durchgänge"]
   [:div#match-tables (for [m matches] [:div (match-table m)])]
   [:hr])
 
@@ -86,8 +82,16 @@
   [:div#results
    (match-tables matches)])
 
+(defpartial tabs [matches]
+  [:div#tabs
+   (unordered-list [[:a {:href "#t-1"} "Wurfverteilung"] [:a {:href "#t-2"} "Platzierungen"] [:a {:href "#t-3"} "Einzelne Durchgänge"]])
+   [:div#t-1 [:div#chart ""]]
+   [:div#t-2 (final-board matches)]
+   [:div#t-3 (match-tables matches)]
+   ])
+
 (defpage "/data/dist" []
   (json (distribution-to-chart @last-game-played)))
 
 (defpage "/" []
-  (main-layout "Übersicht über die zuletzt gespielten Partien." (results @last-game-played)))
+  (main-layout "Übersicht über die zuletzt gespielten Partien." (tabs @last-game-played)))

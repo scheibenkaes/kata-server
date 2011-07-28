@@ -5,3 +5,4 @@ pom.xml
 /classes/
 .lein-deps-sum
 *.DS_Store
+.lein-failures

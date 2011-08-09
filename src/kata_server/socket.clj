@@ -13,7 +13,7 @@
 (defmethod receive-line false [sock] 
   (when (and sock (.isConnected sock))
     (let [in (reader sock)]
-      (.readLine in))))
+      (try (.readLine in) (catch Exception e nil)))))
 
 (defmulti send-line has-a-socket-in-meta?)
 
@@ -31,3 +31,4 @@
 (defn multicast-line [recipients line] 
   (doseq [rec recipients]
     (send-line (-> rec meta :socket) line)))
+

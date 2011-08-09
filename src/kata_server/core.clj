@@ -11,6 +11,8 @@
 
 (def *max-points* (atom 50))
 
+(def *timeout* (atom 0))
+
 (defn decline-player [sock] 
   (let [out (writer sock)]
     (do
@@ -22,6 +24,7 @@
 
 (defn add-to-queue [player] 
   (do
+    (-> player meta :socket (doto (.setSoTimeout @*timeout*)))
     (send-line player (str "HELO " (-> player :name name) (format " [ROUNDS %s, MAX %s]" @*rounds-to-play* @*max-points*)))
     (dosync
       (alter players-queue conj player))))
@@ -65,15 +68,17 @@
     args
     "Usage java kata-server-*-standalone.jar"
     [[number n "On how many connected players should a match start" "2"]
+     [matches m "Number of matches to play" "1"]
      [points "Points needed to win a match" "50"]
      [port p "Port to listen to" "8000"]
-     [web? w? "Start the web interface" false]
-     [matches m "Number of matches to play" "1"]]
+     [timeout t "The time (in ms) in which a client has to respond. 0 means no timeout." "0"]
+     [web? w? "Start the web interface" false]]
     (do
       (System/setProperty "java.util.logging.config.file" "logging.properties")
       (add-watch players-queue :startup player-queue-watcher)
       (reset! *min-players* (Integer/parseInt number))
       (reset! *max-points* (Integer/parseInt points))
       (reset! *rounds-to-play* (Integer/parseInt matches))
+      (reset! *timeout* (Integer/parseInt timeout))
       (when web? (noir/start (inc (Integer/parseInt port)) {}))
       (server-loop on-connection-created :port (Integer/parseInt port)))))

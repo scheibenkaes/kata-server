@@ -2,7 +2,7 @@
   (:require [kata-server.socket :as socket])
   (:use kata-server.player))
 
-(def name-re #"[\w-_\d ]{2,12}")
+(def name-re #"[\w-_\d]{2,12}")
 
 (def helo #"HELO (.+)")
 

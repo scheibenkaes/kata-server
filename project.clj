@@ -1,4 +1,4 @@
-(defproject kata-server "1.2.1"
+(defproject kata-server "1.3.0"
   :description "Play a dice game against your colleagues."
   :dependencies [[org.clojure/clojure "1.2.1"]
                  [org.clojure/clojure-contrib "1.2.0"]
